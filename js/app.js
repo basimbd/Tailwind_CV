@@ -23,46 +23,60 @@ $(document).ready(function(){
     });
 });
 
-let location_button = document.getElementById('location-id');
-let city_name = location_button.innerText.split(',',1)[0];
+let location_button = $('#location-id');
+let city_name = location_button.text().split(',',1)[0];
 let weather_url = "https://api.openweathermap.org/data/2.5/weather?q="+city_name+"&appid=89ee35f2d09eab65ae74f03ada741468&units=metric"
 
 axios.get(weather_url)
     .then(function (response) {
-        //console.log(response);
         putValuesInHTML(response);
     })
     .catch(function (error) {
         console.log(error);
     });
 
-location_button.addEventListener('click', function (){
+location_button.on('click', function (){
     showWeatherInfo();
 });
 
-function putValuesInHTML(response){
-    let city_name = document.getElementById('city-name-span');
+function putValuesInHTML( {data} ){
+    const city_name_span = $('#city-name-span');
 
-    let temp = document.getElementById('temp-span');
-    let feels_like = document.getElementById('feels_like-span');
-    let humidity = document.getElementById('humidity-span');
-    let pressure = document.getElementById('pressure-span');
-    let wind_speed = document.getElementById('wind-speed-span');
-    let wind_dir = document.getElementById('wind-dir-span');
-    let weather = document.getElementById('weather-span');
+    const temp_span = $('#temp-span');
+    const feels_like_span = $('#feels_like-span');
+    const humidity_span = $('#humidity-span');
+    const pressure_span = $('#pressure-span');
+    const wind_speed_span = $('#wind-speed-span');
+    const wind_dir_span = $('#wind-dir-span');
+    const weather_span = $('#weather-span');
 
-    city_name.innerText = response.data.name;
+    const {
+        name,
+        main: {
+            temp, feels_like, humidity, pressure
+        },
+        wind: {
+            speed, deg
+        },
+        weather: {
+            0: {
+                main
+            }
+        }
+    } = data;
 
-    temp.innerText = response.data.main.temp+"\u2103"; //degree celsius symbol
-    feels_like.innerText = response.data.main.feels_like+"\u2103";
-    humidity.innerText = response.data.main.humidity+"%";
-    pressure.innerText = response.data.main.pressure+"hPa";
-    wind_speed.innerText = response.data.wind.speed+"m/sec";
-    wind_dir.innerText = degreeToText(parseInt(response.data.wind.deg));
-    weather.innerText = response.data.weather[0].main;
+    city_name_span.text(name);
+
+    temp_span.text(temp+"℃");
+    feels_like_span.text(feels_like+"℃");
+    humidity_span.text(humidity+"%");
+    pressure_span.text(pressure+"hPa");
+    wind_speed_span.text(speed+"m/sec");
+    wind_dir_span.text(degreeToText(parseInt(deg)));
+    weather_span.text(main);
 }
 
-function  degreeToText(degree){
+function degreeToText(degree){
     if(degree>337.5) return 'North';
     if(degree>292.5) return 'North West';
     if(degree>247.5) return 'West';
@@ -75,7 +89,7 @@ function  degreeToText(degree){
 }
 
 function showWeatherInfo(){
-    let weather_div = $('#weather-div-id');
+    const weather_div = $('#weather-div-id');
     weather_div.show('slow');
     weather_div.delay(5000).hide('slow');
 }
